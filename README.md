@@ -19,7 +19,7 @@ Once all the installations mentioned in Installations.md are complete, proceed w
 
 Now upload all files and start processing. Create a new excel file with only the fields mentioned as column and upload it.  After processing, the tool will automatically fill them.
 
-The following is how it will look after processing, it will also lead to download the filled excel file. (The names visible in the frontend have been modified). 
+The following is how it will look after processing, it will also lead you to download the filled up excel file. (The names visible in the frontend have been modified). 
 
 <img width="1027" height="422" alt="image" src="https://github.com/user-attachments/assets/226d34e2-aadb-4657-aae2-1a2fc811f88b" />
 
