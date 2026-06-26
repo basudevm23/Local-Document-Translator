@@ -18,8 +18,10 @@ I have focused my implementation on the Qwen 2.5 family of models for your local
 
 Here is the breakdown of the specific models we have utilized in the setup:
 
-qwen2.5:14b (14 billion parameters) ->  I have configured this as your primary high-performance local engine, noting that it requires at least 16GB of RAM to run effectively.
+1. qwen2.5:14b (14 billion parameters) ->  I have configured this as your primary high-performance local engine, noting that it requires at least 16GB of RAM to run effectively.
 
-mistral:7b (7 billion parameters)               
-qwen2.5:7b (7 billion parameters)    -> I configured this as your fallback local engine, designed to run within the tighter constraints of an 8GB RAM machine.               
-llama3:8b (8 billion parameters)    
+2. mistral:7b (7 billion parameters)
+           
+3. qwen2.5:7b (7 billion parameters)    -> I configured this as your fallback local engine, designed to run within the tighter constraints of an 8GB RAM machine.
+   
+4. llama3:8b (8 billion parameters)    
