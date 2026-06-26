@@ -1,6 +1,6 @@
 **Setup**
 
-Once all the installations mentioned in README.md are complete, proceed with the following:
+Once all the installations mentioned in Installations.md are complete, proceed with the following:
 
 1. Download all files by cloning this git repository or directly download as a zip file.
 
