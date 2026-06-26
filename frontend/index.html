@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Intelligent Document Automation</title>
+    <style>
+        :root { --bg-main: #f8fafc; --panel-bg: #ffffff; --border-color: #e2e8f0; --text-dark: #1e293b; --accent-blue: #2563eb; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-main); color: var(--text-dark); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
+        .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; font-size: 1.25rem; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input[type="file"], select, input[type="text"], input[type="password"] { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; }
+        button { background-color: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #f1f5f9; }
+        
+        .progress-container { margin-top: 20px; padding: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc; display: none; }
+        .progress-bar-bg { width: 100%; height: 12px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+        .progress-bar-fill { height: 100%; background-color: #22c55e; width: 0%; transition: width 0.3s ease; }
+        .status-text { font-weight: bold; color: #334155; }
+        .time-remaining { font-size: 0.9rem; color: #64748b; font-style: italic; }
+        .extracted-value-highlight { color: #16a34a; font-weight: 700; }
+
+        .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; margin-bottom: 10px; background: #fafafa; }
+        .chat-input-area { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multilingual Document Translator & Data Extractor</h1>
+        <div class="form-group">
+            <label> (Your documents stay private and are processed securely on your device using Ollama.)<span style="font-weight:normal; color:#64748b;"></span></label>
+            
+        </div>
+        
+        <div class="grid">
+            <div class="panel">
+                <h2>Upload Your Document</h2>
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Document to Process (PDF)</label>
+                        <input type="file" id="docFile" accept=".pdf" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Excel Formatting Sheet (.xlsx)</label>
+                        <input type="file" id="excelFile" accept=".xlsx" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Processing Mode</label>
+                        <select id="modelSelection">
+                            <option value="qwen2.5:14b">Qwen 2.5 14B (Recommended for 16GB RAM)</option>
+                            <option value="qwen2.5:7b">Qwen 2.5 7B (Recommended for 8GB RAM)</option>
+                            
+                        </select>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label>OpenAI API Key <span style="font-weight:normal; color:#64748b;">(Leave blank if using Local models)</span></label>
+                        <input type="password" id="apiKey" placeholder="sk-proj-..." autocomplete="off">
+                    </div> -->
+                    
+                    <button type="submit" id="submitBtn">Start Processing</button>
+                </form>
+
+                <div class="progress-container" id="progressArea">
+                    <div class="status-text" id="statusText">Initializing System...</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBar"></div>
+                    </div>
+                    <div class="time-remaining" id="timeRemaining">Calculating estimated completion time...</div>
+                </div>
+
+                <div id="downloadArea" style="margin-top: 15px; display: none;">
+                    <button id="downloadBtn" style="background-color: #16a34a;">Download Clean Formatted Excel Sheet</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Processing Progress</h2>
+                <div style="overflow-x: auto;">
+                    <table id="logsTable">
+                        <thead>
+                            <tr>
+                                <th>Spreadsheet</th>
+                                <th>Field</th>
+                                <th>Extracted Information (English)</th>
+                                <th>Found on Page(s)</th>
+                                <th>Processing Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" style="text-align: center; color: #64748b;">Upload your files and click "Start Processing".</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Ask About the Document</h2>
+                <div class="chat-box" id="chatBox">
+                    <p style="color: #64748b; font-style: italic;">Ask questions about the document or extracted information...</p>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Example: What does this document say about the company?">
+                    <button id="sendChatBtn">Ask AI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedFilePath = "";
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const progressArea = document.getElementById('progressArea');
+            const statusText = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+            const timeRemainingEl = document.getElementById('timeRemaining');
+            const tbody = document.getElementById('logsTable').querySelector('tbody');
+            
+            submitBtn.innerText = "System Processing...";
+            submitBtn.disabled = true;
+            progressArea.style.display = 'block';
+            document.getElementById('downloadArea').style.display = 'none';
+            progressBar.style.width = '0%';
+            tbody.innerHTML = "";
+            timeRemainingEl.innerText = "Calculating estimated completion time...";
+
+            const formData = new FormData();
+            formData.append('doc_file', document.getElementById('docFile').files[0]);
+            formData.append('excel_file', document.getElementById('excelFile').files[0]);
+            formData.append('model_selection', document.getElementById('modelSelection').value);
+            formData.append('api_key', "");
+
+            let latencyHistory = [];
+            let totalColumns = 0;
+            let currentColumn = 0;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let buffer = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); 
+
+                    for (let line of lines) {
+                        if (!line.trim()) continue;
+                        
+                        try {
+                            const data = JSON.parse(line);
+                            
+                            if (data.status === "log") {
+                                statusText.innerText = data.message;
+                            } 
+                            else if (data.status === "extracted") {
+                                statusText.innerText = `Compiled Output ${data.current} of ${data.total} fields...`;
+                                progressBar.style.width = `${(data.current / data.total) * 100}%`;
+                                
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>${data.sheet}</td>
+                                    <td>${data.column}</td>
+                                    <td class="extracted-value-highlight">${data.value}</td>
+                                    <td>Pg: ${data.pages.join(', ')}</td>
+                                    <td>${data.latency}s</td>
+                                `;
+                                tbody.prepend(tr); 
+                                
+                                latencyHistory.push(data.latency);
+                                const avgTime = latencyHistory.reduce((a, b) => a + b, 0) / latencyHistory.length;
+                                const itemsLeft = data.total - data.current;
+                                const divisor = document.getElementById('modelSelection').value.startsWith("gpt") ? 8 : 1;
+                                const secLeft = Math.round(itemsLeft * avgTime / divisor); 
+                                
+                                if (itemsLeft > 0) {
+                                    timeRemainingEl.innerText = `Estimated Time Remaining: ~${secLeft} seconds`;
+                                }
+                            } 
+                            else if (data.status === "done") {
+                                generatedFilePath = data.file_path;
+                                document.getElementById('downloadArea').style.display = 'block';
+                                statusText.innerText = "✅ Extraction Successfully Completed!";
+                                progressBar.style.width = "100%";
+                                timeRemainingEl.innerText = "All parallel agents resolved.";
+                            } 
+                            else if (data.status === "error") {
+                                statusText.innerText = "❌ System Error!";
+                                timeRemainingEl.innerText = data.message;
+                            }
+                        } catch (parseErr) {
+                            console.error("Error parsing stream chunk", line);
+                        }
+                    }
+                }
+            } catch (err) {
+                alert("Network communication failure: " + err.message);
+            } finally {
+                submitBtn.innerText = "Execute Hybrid Extraction Pipeline";
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if(generatedFilePath) {
+                window.location.href = `http://127.0.0.1:8000/api/download?path=${encodeURIComponent(generatedFilePath)}`;
+            }
+        });
+        
+        document.getElementById('sendChatBtn').addEventListener('click', async () => {
+            const input = document.getElementById('chatInput');
+            const chatBox = document.getElementById('chatBox');
+            const modelSelection = document.getElementById('modelSelection').value;
+            const apiKey = "";
+            const text = input.value.trim();
+            if(!text) return;
+            
+            chatBox.innerHTML += `<p><strong>User:</strong> ${text}</p>`;
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: text,
+                        model_selection: modelSelection,
+                        api_key: apiKey
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.detail) {
+                    chatBox.innerHTML += `<p style="color: red;"><strong>System Error:</strong> ${data.detail}</p>`;
+                } else {
+                    chatBox.innerHTML += `<p><strong>Agent (${modelSelection}):</strong> ${data.response} <br><small style="color: #2563eb;">[Sources Traced on Pages: ${data.citations_pages.join(', ')}]</small></p>`;
+                }
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                chatBox.innerHTML += `<p style="color: red;">Failed to communicate with API.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
